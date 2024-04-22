@@ -1,13 +1,30 @@
 import streamlit as st
 import validators
 
-st.title('Phishing Link Checker')
-url = st.text_input('Enter a URL to check:')
-if st.button('Check URL'):
-    if not validators.url(url):
-        st.write('Please enter a valid URL.')
+from functions import load_encoder, load_model, load_scaler, preprocess_url
+
+# Load models
+encoder = load_encoder("models/encoder_model.pkl")
+scaler = load_scaler("models/scaler_model.pkl")
+random_forest_model = load_model("models/random_forest_model.pkl")
+extra_trees_model = load_model("models/extra_trees_model.pkl")
+
+st.title("Phishing Link Checker")
+url = st.text_input("Enter a URL:")
+if st.button("Check URL"):
+    if not validators.url(url, skip_ipv6_addr=True, skip_ipv4_addr=True, may_have_port=False):
+        st.write("Please enter a valid URL.")
         st.stop()
-    # Code to predict and display results
-    # result = model.predict([url])
-    result = True
-    st.write('This URL is:', 'Phishing' if result else 'Safe')
+
+    if "https://" in url:
+        url = url.replace("https://", "")
+
+    # Preprocess the URL
+    data = preprocess_url(url, encoder, scaler)
+
+    # Make predictions
+    rf_result = random_forest_model.predict(data)
+    et_result = extra_trees_model.predict(data)
+
+    st.write("Random Forest Model Prediction:", "Legitimate" if rf_result[0] else "Phishing")
+    st.write("Extra Trees Model Prediction:", "Legitimate" if et_result[0] else "Phishing")
