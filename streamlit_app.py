@@ -10,6 +10,8 @@ random_forest_model = load_model("models/random_forest_model.pkl")
 extra_trees_model = load_model("models/extra_trees_model.pkl")
 
 st.title("Phishing Link Checker")
+st.write("This app uses machine learning models to predict whether a URL is legitimate or a phishing link.")
+st.write("To view the data dashboard, click [here](https://3vxc23-naman-agrawal.shinyapps.io/shiny_app/)")
 url = st.text_input("Enter a URL:")
 if st.button("Check URL"):
     if not validators.url(url, skip_ipv6_addr=True, skip_ipv4_addr=True, may_have_port=False):
